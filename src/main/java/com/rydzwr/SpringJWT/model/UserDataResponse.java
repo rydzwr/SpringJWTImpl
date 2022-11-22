@@ -1,4 +1,4 @@
-package com.rydzwr.SpringJWT.domain;
+package com.rydzwr.SpringJWT.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

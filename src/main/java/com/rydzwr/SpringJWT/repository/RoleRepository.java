@@ -1,6 +1,6 @@
 package com.rydzwr.SpringJWT.repository;
 
-import com.rydzwr.SpringJWT.domain.Role;
+import com.rydzwr.SpringJWT.model.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RoleRepository extends JpaRepository<Role, Long> {

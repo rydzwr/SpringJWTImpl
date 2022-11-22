@@ -3,7 +3,7 @@ package com.rydzwr.SpringJWT.filter;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rydzwr.SpringJWT.domain.User;
+import com.rydzwr.SpringJWT.model.User;
 import com.rydzwr.SpringJWT.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;

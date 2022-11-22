@@ -1,6 +1,6 @@
 package com.rydzwr.SpringJWT.repository;
 
-import com.rydzwr.SpringJWT.domain.User;
+import com.rydzwr.SpringJWT.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

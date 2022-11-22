@@ -1,7 +1,7 @@
 package com.rydzwr.SpringJWT.service;
 
-import com.rydzwr.SpringJWT.domain.Role;
-import com.rydzwr.SpringJWT.domain.User;
+import com.rydzwr.SpringJWT.model.Role;
+import com.rydzwr.SpringJWT.model.User;
 
 public interface UserService {
     User saveUser(User user);

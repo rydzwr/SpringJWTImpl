@@ -32,7 +32,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     // This filters checks every request for authToken
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (request.getServletPath().equals("/api/login") || request.getServletPath().equals("/api/token/refresh")) {
+        if (request.getRequestURI().equals("/api/login") || request.getRequestURI().equals("/api/token/refresh")) {
             filterChain.doFilter(request, response);
             return;
         }

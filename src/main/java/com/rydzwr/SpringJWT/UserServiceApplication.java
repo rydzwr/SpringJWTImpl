@@ -1,7 +1,7 @@
 package com.rydzwr.SpringJWT;
 
-import com.rydzwr.SpringJWT.domain.Role;
-import com.rydzwr.SpringJWT.domain.User;
+import com.rydzwr.SpringJWT.model.Role;
+import com.rydzwr.SpringJWT.model.User;
 import com.rydzwr.SpringJWT.service.UserService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

@@ -1,11 +1,11 @@
-package com.rydzwr.SpringJWT.api;
+package com.rydzwr.SpringJWT.controller;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rydzwr.SpringJWT.domain.Role;
-import com.rydzwr.SpringJWT.domain.User;
-import com.rydzwr.SpringJWT.domain.UserDataResponse;
+import com.rydzwr.SpringJWT.model.Role;
+import com.rydzwr.SpringJWT.model.User;
+import com.rydzwr.SpringJWT.model.UserDataResponse;
 import com.rydzwr.SpringJWT.security.TokenBlackList;
 import com.rydzwr.SpringJWT.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -77,7 +77,6 @@ public class UserController {
 
     @GetMapping("/token/refresh")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        //  String authHeader = request.getHeader(AUTHORIZATION);
         Cookie[] cookies = request.getCookies();
         Map<String, Cookie> cookieMap = new HashMap<>();
         for (Cookie cookie : cookies) {
@@ -101,7 +100,6 @@ public class UserController {
                     .sign(algorithm);
             Map<String, String> tokens = new HashMap<>();
             tokens.put("access_token", accessToken);
-            //  tokens.put("refresh_token", refreshToken);
 
             response.setContentType(APPLICATION_JSON_VALUE);
             new ObjectMapper().writeValue(response.getOutputStream(), tokens);
