@@ -8,14 +8,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.jupiter.api.Test;
 
@@ -28,6 +27,12 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import javax.servlet.http.Cookie;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @SpringBootTest
@@ -89,46 +94,55 @@ public class UserControllerTest {
                         get("/api/data/user")
                                 .headers(headers))
                 .andExpect(status().isForbidden());
+    }
 
-        // ---------------------------------------------------------------------------------
-
-        /*
+    @Test
+    public void shouldReturnNewAccessToken() throws Exception {
+        final String[] results = new String[1];
+        List<Cookie> cookies = new ArrayList<>();
         this.mockMvc.perform(
-                get("/api/token/refresh")
-                        .headers(headers)
+                post("/api/login")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                        .param("username", "Admin")
+                        .param("password", "1234")
         ).andDo(new ResultHandler() {
             @Override
             public void handle(MvcResult result) throws Exception {
                 var parser = new JSONObject(result.getResponse().getContentAsString());
+                cookies.addAll(Arrays.stream(result.getResponse().getCookies()).toList());
                 results[0] = parser.getString("access_token");
             }
         });
-        String newAccessToken = results[0];
-        log.info("New Access TOKEN --> " + newAccessToken);
+        log.info("Access TOKEN --> " + results[0]);
+
+        String accessToken = results[0];
+
+        Cookie refreshTokenCookie = cookies.stream().filter((cookie) -> cookie.getName().equals("jwt")).findAny().get();
+        String refreshTokenValue = refreshTokenCookie.getValue();
+        log.info("FOUND REFRESH TOKEN -->> " + refreshTokenValue);
 
         assertNotNull(accessToken);
 
-        headers.remove("Authorization");
-        headers.add("Authorization", "Bearer " + newAccessToken);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+
+        final String[] refreshResults = new String[1];
 
         this.mockMvc.perform(
-                        get("/api/data/admin")
-                                .contentType(APPLICATION_JSON)
-                                .headers(headers)
-                )
-                .andDo(print()).andExpect(content().string(expected.trim()));
+                get("/api/token/refresh")
+                        .headers(headers)
+                        .cookie(new Cookie("jwt", refreshTokenValue))
+        ).andDo(new ResultHandler() {
+            @Override
+            public void handle(MvcResult result) throws Exception {
+                log.info("RESULT -->>" + result.getResponse().getContentAsString());
+                var parser = new JSONObject(result.getResponse().getContentAsString());
+                refreshResults[0] = parser.getString("access_token");
+            }
+        });
 
-        this.mockMvc.perform(
-                        get("/api/logout")
-                                .headers(headers)
-                )
-                .andDo(print()).andExpect(status().is2xxSuccessful());
-
-        this.mockMvc.perform(
-                        get("/api/data/admin"))
-                .andExpect(status().isForbidden());
-
-         */
+        String newAccessToken = refreshResults[0];
+        assertNotEquals(accessToken, newAccessToken);
     }
 
     @Test

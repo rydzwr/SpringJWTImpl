@@ -84,13 +84,18 @@ public class UserController {
         }
 
         if (!cookieMap.containsKey("jwt")) {
-            sendError(response);
+            sendError(response, "Token Is Missing");
         }
 
         try {
             String refreshToken = cookieMap.get("jwt").getValue();
             Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
             User user = userService.findByRefreshToken(refreshToken);
+
+            if (user == null) {
+                sendError(response, "Cannot find user");
+                return;
+            }
 
             String accessToken = JWT.create()
                     .withSubject(user.getUsername())
@@ -116,12 +121,12 @@ public class UserController {
         }
     }
 
-    private void sendError(HttpServletResponse response) throws IOException {
-        response.setHeader("error", "Refresh Token Is Missing");
+    private void sendError(HttpServletResponse response, String message) throws IOException {
+        response.setHeader("error", message);
         response.setStatus(UNAUTHORIZED.value());
 
         Map<String, String> error = new HashMap<>();
-        error.put("error_message", "Refresh Token Is Missing");
+        error.put("error_message", message);
 
         response.setContentType(APPLICATION_JSON_VALUE);
         new ObjectMapper().writeValue(response.getOutputStream(), error);
