@@ -1,7 +1,6 @@
 package com.rydzwr.SpringJWT.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.json.JSONParser;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,8 +22,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -32,7 +29,6 @@ import javax.servlet.http.Cookie;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @SpringBootTest
@@ -52,23 +48,18 @@ public class UserControllerTest {
     }
 
     @Test
-    public void e2eApiTest() throws Exception {
+    public void shouldUnauthorizedAdminToEnterUserPage() throws Exception {
         final String[] results = new String[2];
         this.mockMvc.perform(
                         post("/api/login")
                                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                                 .param("username", "Admin")
                                 .param("password", "1234")
-        ).andDo(new ResultHandler() {
-            @Override
-            public void handle(MvcResult result) throws Exception {
-                var parser = new JSONObject(result.getResponse().getContentAsString());
-                results[0] = parser.getString("access_token");
-                results[1] = parser.getString("role");
-            }
+        ).andDo(result -> {
+            var parser = new JSONObject(result.getResponse().getContentAsString());
+            results[0] = parser.getString("access_token");
+            results[1] = parser.getString("role");
         });
-        log.info("Access TOKEN --> " + results[0]);
-        log.info("ROLE --> " + results[1]);
 
         String accessToken = results[0];
         String userRole = results[1];
@@ -105,21 +96,16 @@ public class UserControllerTest {
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                         .param("username", "Admin")
                         .param("password", "1234")
-        ).andDo(new ResultHandler() {
-            @Override
-            public void handle(MvcResult result) throws Exception {
-                var parser = new JSONObject(result.getResponse().getContentAsString());
-                cookies.addAll(Arrays.stream(result.getResponse().getCookies()).toList());
-                results[0] = parser.getString("access_token");
-            }
+        ).andDo(result -> {
+            var parser = new JSONObject(result.getResponse().getContentAsString());
+            cookies.addAll(Arrays.stream(result.getResponse().getCookies()).toList());
+            results[0] = parser.getString("access_token");
         });
-        log.info("Access TOKEN --> " + results[0]);
 
         String accessToken = results[0];
 
         Cookie refreshTokenCookie = cookies.stream().filter((cookie) -> cookie.getName().equals("jwt")).findAny().get();
         String refreshTokenValue = refreshTokenCookie.getValue();
-        log.info("FOUND REFRESH TOKEN -->> " + refreshTokenValue);
 
         assertNotNull(accessToken);
 
@@ -132,13 +118,10 @@ public class UserControllerTest {
                 get("/api/token/refresh")
                         .headers(headers)
                         .cookie(new Cookie("jwt", refreshTokenValue))
-        ).andDo(new ResultHandler() {
-            @Override
-            public void handle(MvcResult result) throws Exception {
-                log.info("RESULT -->>" + result.getResponse().getContentAsString());
-                var parser = new JSONObject(result.getResponse().getContentAsString());
-                refreshResults[0] = parser.getString("access_token");
-            }
+        ).andDo(result -> {
+            log.info("RESULT -->>" + result.getResponse().getContentAsString());
+            var parser = new JSONObject(result.getResponse().getContentAsString());
+            refreshResults[0] = parser.getString("access_token");
         });
 
         String newAccessToken = refreshResults[0];
